@@ -1,12 +1,17 @@
 package com.example.hptuners
 
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -19,19 +24,34 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.hptuners.screens.Greeting
+import androidx.navigation.toRoute
+import com.example.hptuners.screens.AdoptACatScreen
+import com.example.hptuners.screens.AdoptedCatsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HpTunersApp() {
+fun CatAdoptionBoard() {
     val navController = rememberNavController()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
-                    Text("Louis' HP Tuners List")
+                    Text("Cat Adoption Board")
+                },
+                navigationIcon = {
+                    IconButton(
+                        onClick = {
+                            println("we're trying to go backwards")
+                            navController.popBackStack()
+                        }
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
                 }
             )
         },
@@ -51,7 +71,7 @@ fun HpTunersApp() {
                 },
                 floatingActionButton = {
                     FloatingActionButton(
-                        onClick = { navController.navigate(Edit) }
+                        onClick = { navController.navigate(route = Add) }
                     ) {
                         Icon(  Icons.Default.Add, contentDescription = "Add")
                     }
@@ -61,13 +81,25 @@ fun HpTunersApp() {
     ) { innerPadding ->
         NavHost(navController = navController, startDestination = Home, modifier = Modifier.padding(innerPadding)) {
             composable<Home> {
-                Greeting(name = "Android")
+                AdoptedCatsScreen(
+                    nav = navController,
+                    name = "Android"
+                )
             }
-            composable<Edit> {
-                Text("you've gone to the Edit page")
+            composable<Edit>(
+                enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+                exitTransition = { fadeOut() }
+            ) { backStackEntry ->
+                val edit: Edit = backStackEntry.toRoute()
+                Text("You've gone to the Edit page with ID: ${edit.id}", modifier = Modifier.fillMaxSize())
+            }
+            composable<Add>(
+                enterTransition = { slideInHorizontally { -it } }
+            ) {
+                AdoptACatScreen(nav = navController)
             }
             composable<Wip> {
-                Text("Work In Progress")
+                Text("Work In Progress", modifier = Modifier.fillMaxSize())
             }
         }
 

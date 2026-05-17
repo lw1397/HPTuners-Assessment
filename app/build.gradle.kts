@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.gradle.secrets)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -21,10 +22,21 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        val apiKey: String = project.findProperty("CATS_API_KEY") as String
-        buildConfigField("String", "CATS_API_KEY", apiKey)
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            val apiKey: String = project.findProperty("CATS_API_KEY") as String
+            buildConfigField("String", "CATS_API_KEY", apiKey)
+            buildConfigField("String", "BASE_URL", "\"https://api.thecatapi.com\"")
+        }
+        // I don't have different values to put here, but this is me saying "Production different from Develop" :)
+        release {
+            val apiKey: String = project.findProperty("CATS_API_KEY") as String
+            buildConfigField("String", "CATS_API_KEY", apiKey)
+            buildConfigField("String", "BASE_URL", "\"https://api.thecatapi.com\"")
+        }
     }
 
     buildTypes {
@@ -54,7 +66,6 @@ dependencies {
     implementation(libs.androidx.compose.material.icons)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.text.google.fonts)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
 
@@ -89,6 +100,11 @@ dependencies {
 
     // Preferences DataStore (SharedPreferences like APIs)
     implementation(libs.androidx.datastore.preferences)
+
+    // Hilt-Dagger
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    ksp(libs.hilt.android.compiler)
 
     // Default Testing Dependencies (came with the Example Repo)
     testImplementation(libs.junit)
