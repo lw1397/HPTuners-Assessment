@@ -27,6 +27,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.hptuners.screens.AdoptACatScreen
 import com.example.hptuners.screens.AdoptedCatsScreen
+import com.example.hptuners.screens.EditAdoptedCatScreen
+import com.example.hptuners.screens.EditAdoptedCatView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,17 +83,13 @@ fun CatAdoptionBoard() {
     ) { innerPadding ->
         NavHost(navController = navController, startDestination = Home, modifier = Modifier.padding(innerPadding)) {
             composable<Home> {
-                AdoptedCatsScreen(
-                    nav = navController,
-                    name = "Android"
-                )
+                AdoptedCatsScreen(nav = navController)
             }
             composable<Edit>(
                 enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
                 exitTransition = { fadeOut() }
-            ) { backStackEntry ->
-                val edit: Edit = backStackEntry.toRoute()
-                Text("You've gone to the Edit page with ID: ${edit.id}", modifier = Modifier.fillMaxSize())
+            ) {
+                EditAdoptedCatScreen(nav = navController)
             }
             composable<Add>(
                 enterTransition = { slideInHorizontally { -it } }

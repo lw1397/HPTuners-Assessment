@@ -2,6 +2,7 @@ package com.example.hptuners.data.adoptedCat
 
 import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.ForeignKey
 import androidx.room.Junction
 import androidx.room.PrimaryKey
 import androidx.room.Relation
@@ -10,34 +11,47 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-class AdoptedCat(
+data class AdoptedCat(
     @PrimaryKey val id: String,
-    var name: String? = null,
+    var name: String,
     val url: String,
     val width: Int,
-    val height: Int
+    val height: Int,
+    val temperament: List<String>,
+    val earTipped: Boolean = false,
 )
 
-@Entity(primaryKeys = ["catId", "breedId"])
+/*
+ At Seerist, my preferred pattern was Denormalized list of IDs, but this relational is easier to setup
+
+ Ex: Some reports would tag every country on a continent, resulting in 50+ countries worth of data for a single
+ article in a list. Because you could search data by country, we already had a work manager run on login/app load
+ to populate a Countries table with this information. When we processed an article, we would only save a list
+ of the Alpha2 (or Alpha3 ?) codes. The first time the user looked up country data, we'd pull
+ that info into an active variable in the Singleton Repo, and filter the countries from that list. This avoided
+ relational DB calls, and it saved a lot on DB space.
+*/
+@Entity(
+    primaryKeys = ["catId", "breedId"],
+    foreignKeys = [
+        ForeignKey(
+            entity = AdoptedCat::class,
+            parentColumns = ["id"],
+            childColumns = ["catId"],
+            onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = Breed::class,
+            parentColumns = ["id"],
+            childColumns = ["breedId"]
+        )
+    ]
+)
 data class CatBreedCrossRef(
     val catId: String,
     val breedId: String
 )
 
-/*
- At Seerist, my preferred pattern was Denormalized list of IDs so I didn't need a relational table
-
- Ex: All data had a list of country information, I would store the Alpha2 in a list and look it up
- from a "config" table I loaded with a worker. Because we were doing A LOT of geo data, I would also
- cache that value at the Repo layer when you first loaded in so that you weren't constantly hitting the DB.
-
- So the final pattern would be:
- 1) When logging in, explicitly call and wait for countries
- 2) On subsequent loads, start a background worker to query, parse, and update the countries
- 3) The first time you request the country info, load it into a cached list on the Singleton for Country Lookups
- 4) Look up the country from the cached list, attach it to the info
-
-*/
 data class AdoptedCatWithBreeds(
     @Embedded val cat: AdoptedCat,
     @Relation(

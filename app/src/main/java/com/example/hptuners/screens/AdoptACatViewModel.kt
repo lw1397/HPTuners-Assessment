@@ -14,6 +14,34 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+val randomCatNames = listOf(
+    "Tater Tot",
+    "Macaroni",
+    "Siracha",
+    "Garlic Bread",
+    "Cheddar Goblin",
+    "Sir Pounce-a-Lot",
+    "Count Fluffula",
+    "Professor Wigglebottom",
+    "Chairman Meow",
+    "Lady Paw",
+    "Gremlin",
+    "Mayhem",
+    "Goblin",
+    "Waffles the Destroyer",
+    "Chaos Machine",
+    "Gary",
+    "Brenda",
+    "Kevin",
+    "Walter",
+    "Craig",
+    "Bootsy Collins",
+    "Noodle",
+    "Socks (but only has three)",
+    "Doink",
+    "Meowly Cyrus"
+)
+
 @HiltViewModel
 class AdoptACatViewModel @Inject constructor(
     val catRepository: CatRepository,
@@ -30,9 +58,9 @@ class AdoptACatViewModel @Inject constructor(
         }
     }
 
-    fun adoptACat(chosen: Cat, onSaved: () -> Unit) {
+    fun adoptACat(chosen: Cat, name: String, onSaved: () -> Unit) {
         viewModelScope.launch {
-            adoptedCatRepository.adoptACat(chosen, "Stinky")
+            adoptedCatRepository.adoptACat(chosen, name.takeIf { it.isNotEmpty() } ?: randomCatNames.random())
             onSaved()
         }
     }

@@ -6,12 +6,16 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AdoptedCatDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(cat: AdoptedCat)
+
+    @Update
+    suspend fun update(cat: AdoptedCat)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCatBreedCrossRef(crossRefs: List<CatBreedCrossRef>)
@@ -20,6 +24,10 @@ interface AdoptedCatDao {
     @Query("SELECT * FROM AdoptedCat")
     fun getAllWithBreeds(): Flow<List<AdoptedCatWithBreeds>>
 
+    @Transaction
+    @Query("Select * FROM AdoptedCat WHERE id = :id")
+    fun getCatWithBreedById(id: String): Flow<AdoptedCat>
+
     @Delete
-    fun delete(cat: AdoptedCat)
+    suspend fun delete(cat: AdoptedCat)
 }

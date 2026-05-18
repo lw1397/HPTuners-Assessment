@@ -1,19 +1,34 @@
 package com.example.hptuners.screens
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,16 +46,21 @@ fun AdoptACatScreen(
     AdoptACatView(
         nav = nav,
         catOptions = viewModel.catOptions.collectAsStateWithLifecycle(),
-        adoptACat = { chosen -> viewModel.adoptACat(chosen) { nav.popBackStack() } }
+        adoptACat = { chosen, name, callback -> viewModel.adoptACat(chosen, name) { callback() } }
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdoptACatView(
     nav: NavController,
     catOptions: State<UiState<List<Cat>>>,
-    adoptACat: (Cat) -> Unit
+    adoptACat: (Cat, String, () -> Unit) -> Unit
 ) {
+    var showSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    var selectedCat by remember { mutableStateOf<Cat?>(null) }
+
     LazyColumn(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
@@ -54,22 +74,73 @@ fun AdoptACatView(
                 if (catOptions.value.data.isNullOrEmpty()) {
                     item { Text("Looks like we don't have any cats for the breed")}
                 }
-                items(catOptions.value.data ?: listOf()) {
+
+                items(catOptions.value.data ?: listOf()) { cat ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp)
-                            .clickable { adoptACat(it) },
+                            .clickable {
+                                selectedCat = cat
+                                showSheet = true
+                            },
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(text = "ID: ${it.id}")
-                        Text(text = "Names: ${it.breeds.joinToString("") { breed -> breed.name }}")
+                        Text(text = "ID: ${cat.id}")
+                        Text(text = "Names: ${cat.breeds.joinToString("") { breed -> breed.name }}")
                         AsyncImage(
-                            model = it.url,
-                            contentDescription = "Picture for Cat ID: ${it.id}",
+                            model = cat.url,
+                            contentDescription = "Picture for Cat ID: ${cat.id}",
                             modifier = Modifier.height(40.dp)
                         )
                     }
+                }
+            }
+        }
+    }
+
+    if (showSheet && selectedCat != null) {
+        ModalBottomSheet(
+            onDismissRequest = { showSheet = false },
+            sheetState = sheetState,
+            contentWindowInsets = { WindowInsets(0, 0, 0, 0) }
+        ) {
+            val catName = rememberTextFieldState()
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .padding(bottom = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                TextField(
+                    state = catName,
+                    label = { Text("You New Friend's Name") },
+                    placeholder = { Text("(Leave Blank for Random Name)") }
+                )
+
+                Button (
+                    onClick = {
+                        selectedCat?.let { cat ->
+                            adoptACat(cat, catName.text.toString()) {
+                                showSheet = false
+                                nav.popBackStack()
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                ) {
+                    Text("Adopt", color = MaterialTheme.colorScheme.onPrimary)
+                }
+
+                OutlinedButton (
+                    onClick = { showSheet = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                ) {
+                    Text("Cancel", color = MaterialTheme.colorScheme.onSecondary)
                 }
             }
         }

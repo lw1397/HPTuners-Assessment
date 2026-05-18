@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.hptuners.UiState
+import com.example.hptuners.data.adoptedCat.AdoptedCat
 import com.example.hptuners.data.adoptedCat.AdoptedCatRepository
 import com.example.hptuners.data.adoptedCat.AdoptedCatWithBreeds
 import com.example.hptuners.data.breed.Breed
@@ -21,8 +22,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AdoptedCatsViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-    adoptedCatRepository: AdoptedCatRepository,
+    private val adoptedCatRepository: AdoptedCatRepository,
     private val breedRepository: BreedRepository
 ): ViewModel() {
 
@@ -30,7 +30,9 @@ class AdoptedCatsViewModel @Inject constructor(
         if (breeds.isEmpty()) {
             UiState.loading()
         } else {
-            UiState.success(breeds)
+            breeds.filter { it.temperament.length > 1 }.let {
+                UiState.success(breeds)
+            }
         }
     }.stateIn(
         scope = viewModelScope,
@@ -49,6 +51,12 @@ class AdoptedCatsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             breedRepository.loadAllBreeds()
+        }
+    }
+
+    fun removeAdoptedCat(cat: AdoptedCat) {
+        viewModelScope.launch {
+            adoptedCatRepository.removeAdoptedCat(cat)
         }
     }
 }

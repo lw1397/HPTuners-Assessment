@@ -29,7 +29,10 @@ class AppModule {
         return Room.databaseBuilder(
             context,
             AppDatabase::class.java, "hptuners_db"
-        ).build()
+        )
+            // Development only, I would NEVER have this in a production app
+            .fallbackToDestructiveMigration(false)
+            .build()
     }
 
     @Provides
