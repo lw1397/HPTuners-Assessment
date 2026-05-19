@@ -3,10 +3,9 @@ package com.example.hptuners.screens
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.toRoute
 import com.example.hptuners.Edit
-import com.example.hptuners.UiState
+import com.example.hptuners.utils.UiState
 import com.example.hptuners.data.adoptedCat.AdoptedCat
 import com.example.hptuners.data.adoptedCat.AdoptedCatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -30,6 +30,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,13 +40,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.hptuners.Edit
-import com.example.hptuners.Status
-import com.example.hptuners.UiState
+import com.example.hptuners.utils.Status
+import com.example.hptuners.utils.UiState
 import com.example.hptuners.data.adoptedCat.AdoptedCat
 import com.example.hptuners.data.adoptedCat.AdoptedCatWithBreeds
+import com.example.hptuners.data.adoptedCat.CatBreedCrossRef
 import com.example.hptuners.data.breed.Breed
+import com.example.hptuners.utils.PreviewUtils
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,7 +59,6 @@ fun AdoptedCatsScreen(
 ) {
     AdoptedCatsView(
         nav = nav,
-        breedsState = viewModel.breeds.collectAsStateWithLifecycle(),
         adoptedCatsState = viewModel.adoptedCats.collectAsStateWithLifecycle(),
         removeAdoptedCat = { cat: AdoptedCat -> viewModel.removeAdoptedCat(cat) }
     )
@@ -64,32 +67,26 @@ fun AdoptedCatsScreen(
 @Composable
 fun AdoptedCatsView(
     nav: NavController,
-    breedsState: State<UiState<List<Breed>>>,
     adoptedCatsState: State<UiState<List<AdoptedCatWithBreeds>>>,
     removeAdoptedCat: (AdoptedCat) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    val search = rememberTextFieldState()
-    var nameBreedToggle by remember { mutableStateOf(false) }
+    var search by rememberSaveable { mutableStateOf("") }
+    var nameBreedToggle by rememberSaveable { mutableStateOf(false) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
     ) {
         item {
-            if (breedsState.value.status == Status.LOADING) {
-                Text(text = "Loading Up The Breeds...")
-            }
-            if (!breedsState.value.data.isNullOrEmpty()) {
-                Text(
-                    text = "Breed Names: ${breedsState.value.data?.joinToString(", ") { it.name }}"
-                )
-            }
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextField(
-                    state = search,
+                    value = search,
+                    onValueChange = {
+                        search = it
+                    },
                     label = { Text("Search") },
                     placeholder = { Text("(Name or Breed)") },
                     modifier = Modifier.weight(2f)
@@ -110,11 +107,11 @@ fun AdoptedCatsView(
 
         }
         adoptedCatsState.value.data?.filter {
-            if (search.text.toString().isNotEmpty()) {
+            if (search.isNotEmpty()) {
                 if(nameBreedToggle) {
-                    it.breeds.any { breed -> breed.name.contains(search.text.toString(), ignoreCase = true)}
+                    it.breeds.any { breed -> breed.name.contains(search, ignoreCase = true)}
                 } else {
-                    it.cat.name.contains(search.text.toString(), ignoreCase = true)
+                    it.cat.name.contains(search, ignoreCase = true)
                 }
             } else {
                 true
@@ -234,8 +231,16 @@ fun AdoptedCatsView(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
-fun NeighborhoodCatsPreview() {
-    // TODO: NeighborhoodCatsView()
+fun AdoptedCatsPreview() {
+    MaterialTheme {
+        AdoptedCatsView(
+            nav = rememberNavController(),
+            adoptedCatsState = remember { mutableStateOf(UiState.success(List(6) { i ->
+                AdoptedCatWithBreeds(PreviewUtils.adoptedCat.copy(id = "$i"), listOf(PreviewUtils.breed))
+            }))},
+            removeAdoptedCat = { _ -> }
+        )
+    }
 }

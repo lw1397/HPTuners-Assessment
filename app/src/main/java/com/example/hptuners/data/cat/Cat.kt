@@ -8,7 +8,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Cat(
+data class Cat(
     val id: String,
     val url: String,
     val width: Int,
@@ -17,7 +17,7 @@ class Cat(
 )
 
 @Serializable
-class BasicBreed(
+data class BasicBreed(
     val id: String,
     val name: String,
     val description: String,

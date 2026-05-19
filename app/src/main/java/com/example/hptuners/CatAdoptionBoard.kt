@@ -1,13 +1,12 @@
 package com.example.hptuners
 
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.BottomAppBar
@@ -18,17 +17,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
+import androidx.navigation.navigation
 import com.example.hptuners.screens.AdoptACatScreen
 import com.example.hptuners.screens.AdoptedCatsScreen
 import com.example.hptuners.screens.EditAdoptedCatScreen
-import com.example.hptuners.screens.EditAdoptedCatView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,9 +42,9 @@ fun CatAdoptionBoard() {
                     Text("Cat Adoption Board")
                 },
                 navigationIcon = {
+                    // TODO: Could show conditionally. Android has hardware back too, so potentially unnecessary
                     IconButton(
                         onClick = {
-                            println("we're trying to go backwards")
                             navController.popBackStack()
                         }
                     ) {
@@ -81,23 +80,30 @@ fun CatAdoptionBoard() {
             )
         },
     ) { innerPadding ->
-        NavHost(navController = navController, startDestination = Home, modifier = Modifier.padding(innerPadding)) {
-            composable<Home> {
-                AdoptedCatsScreen(nav = navController)
+        NavHost(
+            navController = navController,
+            startDestination = Home,
+            modifier = Modifier.padding(innerPadding).padding(horizontal = 8.dp),
+            enterTransition = { slideInHorizontally(initialOffsetX = { -it }) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { it }) },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) }
+        ) {
+            navigation<Home>(startDestination = AdoptedList) {
+                composable<AdoptedList> {
+                    AdoptedCatsScreen(nav = navController)
+                }
+                composable<Edit> {
+                    EditAdoptedCatScreen(nav = navController)
+                }
+                composable<Add> {
+                    AdoptACatScreen(nav = navController)
+                }
             }
-            composable<Edit>(
-                enterTransition = { slideInHorizontally(initialOffsetX = { it }) },
-                exitTransition = { fadeOut() }
-            ) {
-                EditAdoptedCatScreen(nav = navController)
-            }
-            composable<Add>(
-                enterTransition = { slideInHorizontally { -it } }
-            ) {
-                AdoptACatScreen(nav = navController)
-            }
-            composable<Wip> {
-                Text("Work In Progress", modifier = Modifier.fillMaxSize())
+            navigation<Wip>(startDestination = BreedList) {
+                composable<BreedList> {
+                    Text("Work In Progress", modifier = Modifier.fillMaxSize())
+                }
             }
         }
 

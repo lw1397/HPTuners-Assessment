@@ -12,11 +12,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -28,15 +32,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
-import com.example.hptuners.Status
-import com.example.hptuners.UiState
+import com.example.hptuners.utils.Status
+import com.example.hptuners.utils.UiState
+import com.example.hptuners.data.breed.Breed
 import com.example.hptuners.data.cat.Cat
+import com.example.hptuners.utils.PreviewUtils
 
 @Composable
 fun AdoptACatScreen(
@@ -45,6 +52,8 @@ fun AdoptACatScreen(
 ) {
     AdoptACatView(
         nav = nav,
+        breeds = viewModel.breedOptions.collectAsStateWithLifecycle(),
+        setBreed = { breed -> viewModel.setBreedFilter(breed?.id) },
         catOptions = viewModel.catOptions.collectAsStateWithLifecycle(),
         adoptACat = { chosen, name, callback -> viewModel.adoptACat(chosen, name) { callback() } }
     )
@@ -54,6 +63,8 @@ fun AdoptACatScreen(
 @Composable
 fun AdoptACatView(
     nav: NavController,
+    breeds: State<UiState<List<Breed>>>,
+    setBreed: (Breed?) -> Unit,
     catOptions: State<UiState<List<Cat>>>,
     adoptACat: (Cat, String, () -> Unit) -> Unit
 ) {
@@ -66,6 +77,13 @@ fun AdoptACatView(
     ) {
         stickyHeader {
             Text("Adoption Board")
+            breeds.value.data?.let {
+                SearchableExpandedDropDownMenu(
+                    options = it,
+                    setBreed = setBreed
+                )
+            }
+
         }
         when(catOptions.value.status) {
             Status.LOADING -> { item { Text("Searching the cat board...")}}
@@ -130,7 +148,9 @@ fun AdoptACatView(
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
                 ) {
                     Text("Adopt", color = MaterialTheme.colorScheme.onPrimary)
                 }
@@ -138,7 +158,9 @@ fun AdoptACatView(
                 OutlinedButton (
                     onClick = { showSheet = false },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
                 ) {
                     Text("Cancel", color = MaterialTheme.colorScheme.onSecondary)
                 }
@@ -147,7 +169,74 @@ fun AdoptACatView(
     }
 }
 
+// Lifted this dropdown from the internet to save time
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdoptACatPreview() {
-    // TODO: AdoptACatView()
+fun SearchableExpandedDropDownMenu(
+    options: List<Breed>,
+    setBreed: (Breed?) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+
+    // Filter items based on query
+    val filteredOptions = options.filter { it.name.contains(searchQuery, ignoreCase = true) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it }
+    ) {
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = {
+                searchQuery = it
+                expanded = true // Keep open while typing
+            },
+            label = { Text("Search Breeds") },
+            placeholder = { Text("Optional Breed Selection") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryEditable, true)
+        )
+
+        if (filteredOptions.isNotEmpty()) {
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Random") },
+                    onClick = {
+                        searchQuery = ""
+                        setBreed(null)
+                        expanded = false
+                    }
+                )
+                filteredOptions.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        text = { Text(selectionOption.name) },
+                        onClick = {
+                            searchQuery = selectionOption.name
+                            setBreed(selectionOption)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun AdoptACatPreview() {
+    MaterialTheme {
+        AdoptACatView(
+            nav = rememberNavController(),
+            breeds = remember { mutableStateOf(UiState.success(listOf()))},
+            setBreed = {_ -> },
+            catOptions = remember { mutableStateOf(UiState.success(List(10) { PreviewUtils.cat}))},
+            adoptACat = { _, _, _, -> }
+        )
+    }
+
 }

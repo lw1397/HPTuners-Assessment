@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
+    // Async Image Retrieval
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
@@ -98,13 +99,18 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
-    // Preferences DataStore (SharedPreferences like APIs)
+    // Preferences DataStore (SharedPreferences)
     implementation(libs.androidx.datastore.preferences)
 
     // Hilt-Dagger
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     ksp(libs.hilt.android.compiler)
+
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
     // Default Testing Dependencies (came with the Example Repo)
     testImplementation(libs.junit)

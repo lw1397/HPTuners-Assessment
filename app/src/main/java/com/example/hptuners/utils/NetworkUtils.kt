@@ -1,4 +1,4 @@
-package com.example.hptuners
+package com.example.hptuners.utils
 
 enum class Status {
     SUCCESS, FAILURE, LOADING,

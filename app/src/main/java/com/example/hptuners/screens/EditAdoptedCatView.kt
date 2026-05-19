@@ -17,16 +17,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.example.hptuners.Status
-import com.example.hptuners.UiState
+import com.example.hptuners.utils.Status
+import com.example.hptuners.utils.UiState
 import com.example.hptuners.data.adoptedCat.AdoptedCat
-import com.example.hptuners.data.adoptedCat.AdoptedCatWithBreeds
+import com.example.hptuners.utils.PreviewUtils
 
 
 @Composable
@@ -60,7 +61,9 @@ fun EditAdoptedCatView(
                     label = { Text("Rename Your friend") },
                     placeholder = { Text("(Leave Blank for Random Name)") }
                 )
-                Row {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text("Ear-Tipped: ")
                     Switch(
                         checked = earTipped,
@@ -77,15 +80,20 @@ fun EditAdoptedCatView(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 ) {
-                    Text("Adopt", color = MaterialTheme.colorScheme.onPrimary)
+                    Text("Save Changes", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
         }
     }
 }
 
+@Preview(showBackground = true)
 @Composable
-@Preview
 fun EditAdoptedCatPreview() {
-    // TODO: EditAdoptedCatView()
+    MaterialTheme {
+        EditAdoptedCatView(
+            cat = remember { mutableStateOf(UiState.success(PreviewUtils.adoptedCat)) },
+            updateAdoptedCat = { _, _, _ -> }
+        )
+    }
 }

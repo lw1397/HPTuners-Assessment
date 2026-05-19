@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity
-class Breed(
+data class Breed(
     @PrimaryKey val id: String,
     val name: String,
     val description: String,
