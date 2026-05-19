@@ -28,7 +28,7 @@ fun LoadingAsyncImage(url: String, id: String, modifier: Modifier = Modifier) {
             .widthIn(60.dp)
             .clip(RoundedCornerShape(12.dp))
             .border(
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceDim), // Defines thickness and color
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceDim),
                 shape = RoundedCornerShape(12.dp)
             )
     )

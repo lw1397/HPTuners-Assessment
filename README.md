@@ -1,4 +1,3 @@
-TODO: Run Instructions
+Simple: Run Instructions
 
-
-Use the example.gradle.properties to apply your own CATS_API_KEY
+Add the CATS_API_KEY line from example.gradle.properties your gradle.properties file, and replace "YOUR_API_KEY" with your API key

@@ -1,5 +1,6 @@
 package com.example.hptuners.screens
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -19,6 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -94,7 +97,9 @@ fun AdoptedCatsView(
     var search by rememberSaveable { mutableStateOf("") }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
     ) {
         ->
         item {
@@ -193,9 +198,7 @@ fun AdoptedCatsView(
                                     removeAdoptedCat(it.cat)
                                 }
                             }
-                            SwipeToDismissBoxValue.Settled -> {
-                                // no action
-                            }
+                            SwipeToDismissBoxValue.Settled -> { /* no-op */}
                         }
                     },
                     backgroundContent = {
@@ -243,7 +246,10 @@ fun AdoptedCatsView(
                         modifier = Modifier
                             .clip(RoundedCornerShape(12.dp))
                             .border(
-                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceDim), // Defines thickness and color
+                                border = BorderStroke(
+                                    2.dp,
+                                    MaterialTheme.colorScheme.surfaceDim
+                                ),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
@@ -269,10 +275,21 @@ fun AdoptedCatsView(
                                         text = "Name: ${it.cat.name}"
                                     )
                                     Text(
-                                        text = "Breed: ${it.breeds.joinToString("") { breed -> breed.name }}"
+                                        text = "Breed: ${it.breeds.joinToString(", ") { breed -> breed.name }}"
                                     )
                                 }
                                 LoadingAsyncImage(it.cat.url, it.cat.id, Modifier.weight(1f))
+                            }
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 2.dp),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                Icon(
+                                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                    contentDescription = if (expanded) "Collapse" else "Expand"
+                                )
                             }
                             if (expanded) {
                                 Column {
@@ -302,7 +319,10 @@ fun AdoptedCatsView(
                     .padding(top = 4.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .border(
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceDim), // Defines thickness and color
+                        border = BorderStroke(
+                            2.dp,
+                            MaterialTheme.colorScheme.surfaceDim
+                        ),
                         shape = RoundedCornerShape(12.dp)
                     )
             ) {
@@ -319,7 +339,6 @@ fun AdoptedCatsView(
                         textAlign = TextAlign.Center
                     )
                 }
-
             }
         }
     }

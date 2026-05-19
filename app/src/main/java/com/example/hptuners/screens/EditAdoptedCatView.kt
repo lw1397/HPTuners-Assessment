@@ -27,6 +27,8 @@ import androidx.navigation.NavController
 import com.example.hptuners.utils.Status
 import com.example.hptuners.utils.UiState
 import com.example.hptuners.data.adoptedCat.AdoptedCat
+import com.example.hptuners.data.adoptedCat.AdoptedCatWithBreeds
+import com.example.hptuners.data.adoptedCat.CatBreedCrossRef
 import com.example.hptuners.utils.PreviewUtils
 
 
@@ -47,12 +49,12 @@ fun EditAdoptedCatScreen(
 
 @Composable
 fun EditAdoptedCatView(
-    cat: State<UiState<AdoptedCat>>,
+    cat: State<UiState<AdoptedCatWithBreeds>>,
     updateAdoptedCat: (AdoptedCat, String?, Boolean?) -> Unit
 ) {
     Column {
         if (cat.value.status != Status.LOADING) {
-            cat.value.data?.let { cat ->
+            cat.value.data?.cat?.let { cat ->
                 val newName = rememberTextFieldState(cat.name)
                 var earTipped by remember { mutableStateOf(cat.earTipped) }
 
@@ -76,7 +78,6 @@ fun EditAdoptedCatView(
                     onClick = {
                         updateAdoptedCat(cat, newName.text.toString(), earTipped)
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 ) {
                     Text("Save Changes", color = MaterialTheme.colorScheme.onPrimary)
@@ -91,7 +92,12 @@ fun EditAdoptedCatView(
 fun EditAdoptedCatPreview() {
     MaterialTheme {
         EditAdoptedCatView(
-            cat = remember { PreviewUtils.uiSuccessState(PreviewUtils.adoptedCat) },
+            cat = remember {
+                PreviewUtils.uiSuccessState(AdoptedCatWithBreeds(
+                    cat = PreviewUtils.adoptedCat,
+                    breeds = listOf(PreviewUtils.breed))
+                )
+           },
             updateAdoptedCat = { _, _, _ -> }
         )
     }

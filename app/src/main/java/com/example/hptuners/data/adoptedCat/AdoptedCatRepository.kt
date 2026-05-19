@@ -1,5 +1,6 @@
 package com.example.hptuners.data.adoptedCat
 
+import androidx.room.Transaction
 import com.example.hptuners.data.cat.Cat
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,12 +20,11 @@ class AdoptedCatRepository @Inject constructor(
             url = cat.url,
             width = cat.width,
             height = cat.height,
-            temperament = cat.breeds.flatMap { it.temperament.split(",") }
+            temperament = cat.breeds.flatMap { it.temperament.split(",").map { it.trim() } }
         )
         val refs = cat.breeds.map { CatBreedCrossRef(catId = cat.id, breedId = it.id) }
 
-        adoptedCatDao.insert(adoptedCat)
-        adoptedCatDao.insertCatBreedCrossRef(refs)
+        adoptedCatDao.insertAdoptedCatAndBreeds(adoptedCat, refs)
     }
 
     suspend fun updateAdoptedCatInfo(cat: AdoptedCat) {

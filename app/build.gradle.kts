@@ -25,29 +25,35 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("../release.keystore")
+            storePassword = System.getenv("STORE_PASSWORD") ?: project.findProperty("STORE_PASSWORD") as String?
+            keyAlias = System.getenv("KEY_ALIAS") ?: project.findProperty("KEY_ALIAS") as String?
+            keyPassword = System.getenv("KEY_PASSWORD") ?: project.findProperty("KEY_PASSWORD") as String?
+        }
+    }
+
     buildTypes {
         debug {
             val apiKey: String = project.findProperty("CATS_API_KEY") as String
             buildConfigField("String", "CATS_API_KEY", apiKey)
             buildConfigField("String", "BASE_URL", "\"https://api.thecatapi.com\"")
         }
-        // I don't have different values to put here, but this is me saying "Production different from Develop" :)
         release {
+            signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
             val apiKey: String = project.findProperty("CATS_API_KEY") as String
             buildConfigField("String", "CATS_API_KEY", apiKey)
             buildConfigField("String", "BASE_URL", "\"https://api.thecatapi.com\"")
         }
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

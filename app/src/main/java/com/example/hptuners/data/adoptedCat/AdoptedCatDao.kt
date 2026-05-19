@@ -21,12 +21,20 @@ interface AdoptedCatDao {
     suspend fun insertCatBreedCrossRef(crossRefs: List<CatBreedCrossRef>)
 
     @Transaction
+    suspend fun insertAdoptedCatAndBreeds(
+        cat: AdoptedCat, refs: List<CatBreedCrossRef>
+    ) {
+        insert(cat)
+        insertCatBreedCrossRef(refs)
+    }
+
+    @Transaction
     @Query("SELECT * FROM AdoptedCat")
     fun getAllWithBreeds(): Flow<List<AdoptedCatWithBreeds>>
 
     @Transaction
     @Query("Select * FROM AdoptedCat WHERE id = :id")
-    fun getCatWithBreedById(id: String): Flow<AdoptedCat>
+    fun getCatWithBreedById(id: String): Flow<AdoptedCatWithBreeds>
 
     @Delete
     suspend fun delete(cat: AdoptedCat)

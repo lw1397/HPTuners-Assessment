@@ -8,6 +8,8 @@ import com.example.hptuners.Edit
 import com.example.hptuners.utils.UiState
 import com.example.hptuners.data.adoptedCat.AdoptedCat
 import com.example.hptuners.data.adoptedCat.AdoptedCatRepository
+import com.example.hptuners.data.adoptedCat.AdoptedCatWithBreeds
+import com.example.hptuners.utils.randomCatNames
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +25,7 @@ class EditAdoptedCatViewModel @Inject constructor(
 ) : ViewModel() {
     val editParams = savedStateHandle.toRoute<Edit>()
 
-    val catToEdit: StateFlow<UiState<AdoptedCat>> =
+    val catToEdit: StateFlow<UiState<AdoptedCatWithBreeds>> =
         adoptedCatRepository.getAdoptedCatById(editParams.id).map { cat ->
             UiState.success(cat)
         }.stateIn(

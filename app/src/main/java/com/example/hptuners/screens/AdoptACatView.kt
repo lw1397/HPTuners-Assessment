@@ -89,7 +89,7 @@ fun AdoptACatView(
     var selectedCat by remember { mutableStateOf<Cat?>(null) }
 
     LazyColumn(
-        modifier = Modifier.padding(horizontal = 8.dp)
+        modifier = Modifier.padding(start = 8.dp, end = 8.dp, bottom = 8.dp)
     ) {
         item {
             Text("Adoption Board")
@@ -115,7 +115,7 @@ fun AdoptACatView(
                         modifier = Modifier.padding(4.dp)
                             .clip(RoundedCornerShape(12.dp))
                             .border(
-                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceDim), // Defines thickness and color
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceDim),
                                 shape = RoundedCornerShape(12.dp)
                             )
                     ) {
@@ -175,7 +175,6 @@ fun AdoptACatView(
                             }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
@@ -185,12 +184,11 @@ fun AdoptACatView(
 
                 OutlinedButton (
                     onClick = { showSheet = false },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 ) {
-                    Text("Cancel", color = MaterialTheme.colorScheme.onSecondary)
+                    Text("Cancel", color = MaterialTheme.colorScheme.error)
                 }
             }
         }

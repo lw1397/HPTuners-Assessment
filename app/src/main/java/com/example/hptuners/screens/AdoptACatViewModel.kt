@@ -9,13 +9,12 @@ import com.example.hptuners.data.breed.Breed
 import com.example.hptuners.data.breed.BreedRepository
 import com.example.hptuners.data.cat.Cat
 import com.example.hptuners.data.cat.CatRepository
+import com.example.hptuners.utils.randomCatNames
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
@@ -23,35 +22,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.filter
-
-val randomCatNames = listOf(
-    "Tater Tot",
-    "Macaroni",
-    "Siracha",
-    "Garlic Bread",
-    "Cheddar Goblin",
-    "Sir Pounce-a-Lot",
-    "Count Fluffula",
-    "Professor Wigglebottom",
-    "Chairman Meow",
-    "Lady Paw",
-    "Gremlin",
-    "Mayhem",
-    "Goblin",
-    "Waffles the Destroyer",
-    "Chaos Machine",
-    "Gary",
-    "Brenda",
-    "Kevin",
-    "Walter",
-    "Craig",
-    "Bootsy Collins",
-    "Noodle",
-    "Socks (but only has three)",
-    "Doink",
-    "Meowly Cyrus"
-)
 
 @HiltViewModel
 class AdoptACatViewModel @Inject constructor(

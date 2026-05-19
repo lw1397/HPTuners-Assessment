@@ -2,13 +2,16 @@ package com.example.hptuners
 
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -17,8 +20,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
@@ -27,6 +33,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.example.hptuners.screens.AdoptACatScreen
 import com.example.hptuners.screens.AdoptedCatsScreen
+import com.example.hptuners.screens.BreedListScreen
 import com.example.hptuners.screens.EditAdoptedCatScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,7 +49,7 @@ fun CatAdoptionBoard() {
                     Text("Cat Adoption Board")
                 },
                 navigationIcon = {
-                    // TODO: Could show conditionally. Android has hardware back too, so potentially unnecessary
+                    // Could show conditionally. Android has hardware back as well, so potentially unnecessary
                     IconButton(
                         onClick = {
                             navController.popBackStack()
@@ -67,7 +74,7 @@ fun CatAdoptionBoard() {
                     IconButton(
                         onClick = { navController.navigate(Wip) }
                     ) {
-                        Icon(Icons.Default.Build, contentDescription = "Work In Progress")
+                        Icon(Icons.Default.Search, contentDescription = "Work In Progress")
                     }
                 },
                 floatingActionButton = {
@@ -102,7 +109,7 @@ fun CatAdoptionBoard() {
             }
             navigation<Wip>(startDestination = BreedList) {
                 composable<BreedList> {
-                    Text("Work In Progress", modifier = Modifier.fillMaxSize())
+                    BreedListScreen()
                 }
             }
         }
