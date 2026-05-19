@@ -75,7 +75,6 @@ fun EditAdoptedCatView(
                 Button (
                     onClick = {
                         updateAdoptedCat(cat, newName.text.toString(), earTipped)
-
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
@@ -92,7 +91,7 @@ fun EditAdoptedCatView(
 fun EditAdoptedCatPreview() {
     MaterialTheme {
         EditAdoptedCatView(
-            cat = remember { mutableStateOf(UiState.success(PreviewUtils.adoptedCat)) },
+            cat = remember { PreviewUtils.uiSuccessState(PreviewUtils.adoptedCat) },
             updateAdoptedCat = { _, _, _ -> }
         )
     }

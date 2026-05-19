@@ -2,7 +2,9 @@ package com.example.hptuners.data.adoptedCat
 
 import com.example.hptuners.data.cat.Cat
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class AdoptedCatRepository @Inject constructor(
     private val adoptedCatDao: AdoptedCatDao
 ) {

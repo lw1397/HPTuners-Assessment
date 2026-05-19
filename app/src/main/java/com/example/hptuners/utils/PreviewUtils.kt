@@ -1,5 +1,6 @@
 package com.example.hptuners.utils
 
+import androidx.compose.runtime.mutableStateOf
 import com.example.hptuners.data.adoptedCat.AdoptedCat
 import com.example.hptuners.data.breed.Breed
 import com.example.hptuners.data.cat.BasicBreed
@@ -42,5 +43,7 @@ class PreviewUtils {
             height = 960,
             temperament = listOf("Active", "Energetic", "Independent", "Intelligent", "Gentle"),
         )
+
+        fun <T> uiSuccessState(data: T) = mutableStateOf(UiState.success(data))
     }
 }

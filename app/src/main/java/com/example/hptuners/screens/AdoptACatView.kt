@@ -1,16 +1,27 @@
 package com.example.hptuners.screens
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -21,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -32,17 +44,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.example.hptuners.utils.Status
 import com.example.hptuners.utils.UiState
 import com.example.hptuners.data.breed.Breed
 import com.example.hptuners.data.cat.Cat
+import com.example.hptuners.utils.LoadingAsyncImage
 import com.example.hptuners.utils.PreviewUtils
 
 @Composable
@@ -53,7 +67,8 @@ fun AdoptACatScreen(
     AdoptACatView(
         nav = nav,
         breeds = viewModel.breedOptions.collectAsStateWithLifecycle(),
-        setBreed = { breed -> viewModel.setBreedFilter(breed?.id) },
+        preferredBreed = viewModel.preferredBreed.collectAsStateWithLifecycle(),
+        setBreed = { breed -> viewModel.setPreferredBreed(breed?.id) },
         catOptions = viewModel.catOptions.collectAsStateWithLifecycle(),
         adoptACat = { chosen, name, callback -> viewModel.adoptACat(chosen, name) { callback() } }
     )
@@ -64,6 +79,7 @@ fun AdoptACatScreen(
 fun AdoptACatView(
     nav: NavController,
     breeds: State<UiState<List<Breed>>>,
+    preferredBreed: State<Breed?>,
     setBreed: (Breed?) -> Unit,
     catOptions: State<UiState<List<Cat>>>,
     adoptACat: (Cat, String, () -> Unit) -> Unit
@@ -75,42 +91,54 @@ fun AdoptACatView(
     LazyColumn(
         modifier = Modifier.padding(horizontal = 8.dp)
     ) {
-        stickyHeader {
+        item {
             Text("Adoption Board")
             breeds.value.data?.let {
                 SearchableExpandedDropDownMenu(
                     options = it,
+                    selected = preferredBreed,
                     setBreed = setBreed
                 )
             }
-
         }
         when(catOptions.value.status) {
-            Status.LOADING -> { item { Text("Searching the cat board...")}}
-            Status.FAILURE -> { item { Text("Failed to load the list :(")}}
+            Status.LOADING -> { item { Text("Searching the cat board...", modifier = Modifier.padding(4.dp))}}
+            Status.FAILURE -> { item { Text("Failed to load the list :(", modifier = Modifier.padding(4.dp))}}
             Status.SUCCESS -> {
                 if (catOptions.value.data.isNullOrEmpty()) {
                     item { Text("Looks like we don't have any cats for the breed")}
                 }
 
                 items(catOptions.value.data ?: listOf()) { cat ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp)
-                            .clickable {
-                                selectedCat = cat
-                                showSheet = true
-                            },
-                        verticalAlignment = Alignment.CenterVertically,
+                    Surface(
+                        tonalElevation = 2.dp,
+                        modifier = Modifier.padding(4.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(
+                                border = BorderStroke(2.dp, MaterialTheme.colorScheme.surfaceDim), // Defines thickness and color
+                                shape = RoundedCornerShape(12.dp)
+                            )
                     ) {
-                        Text(text = "ID: ${cat.id}")
-                        Text(text = "Names: ${cat.breeds.joinToString("") { breed -> breed.name }}")
-                        AsyncImage(
-                            model = cat.url,
-                            contentDescription = "Picture for Cat ID: ${cat.id}",
-                            modifier = Modifier.height(40.dp)
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .clickable {
+                                    selectedCat = cat
+                                    showSheet = true
+                                },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.weight(2f)
+                            ) {
+                                Text(text = "Breed: ${cat.breeds.joinToString(", ") { breed -> breed.name }}")
+                                Text(text = "Origin: ${cat.breeds.joinToString { breed -> breed.origin }}")
+                            }
+
+                            LoadingAsyncImage(cat.url, cat.id, Modifier.weight(1f))
+                        }
                     }
                 }
             }
@@ -174,17 +202,19 @@ fun AdoptACatView(
 @Composable
 fun SearchableExpandedDropDownMenu(
     options: List<Breed>,
+    selected: State<Breed?>,
     setBreed: (Breed?) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
+    var searchQuery by remember { mutableStateOf(selected.value?.name ?: "") }
 
     // Filter items based on query
     val filteredOptions = options.filter { it.name.contains(searchQuery, ignoreCase = true) }
 
     ExposedDropdownMenuBox(
         expanded = expanded,
-        onExpandedChange = { expanded = it }
+        onExpandedChange = { expanded = it },
+        modifier = Modifier.padding(4.dp)
     ) {
         OutlinedTextField(
             value = searchQuery,
@@ -232,10 +262,12 @@ private fun AdoptACatPreview() {
     MaterialTheme {
         AdoptACatView(
             nav = rememberNavController(),
-            breeds = remember { mutableStateOf(UiState.success(listOf()))},
-            setBreed = {_ -> },
-            catOptions = remember { mutableStateOf(UiState.success(List(10) { PreviewUtils.cat}))},
-            adoptACat = { _, _, _, -> }
+            breeds = remember { PreviewUtils.uiSuccessState(listOf()) },
+            preferredBreed = remember { mutableStateOf(null) },
+            setBreed = { _ -> },
+            catOptions = remember { PreviewUtils.uiSuccessState((List(10) { PreviewUtils.cat })) },
+            adoptACat = { _, _, _, -> },
+
         )
     }
 

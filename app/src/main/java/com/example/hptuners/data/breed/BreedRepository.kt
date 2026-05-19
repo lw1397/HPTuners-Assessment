@@ -5,7 +5,9 @@ import io.ktor.client.call.body
 import io.ktor.client.plugins.resources.get
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class BreedRepository @Inject constructor(
     private val ktorClient: HttpClient,
     private val breedDao: BreedDao

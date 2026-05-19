@@ -6,7 +6,9 @@ import io.ktor.client.plugins.resources.get
 import io.ktor.client.statement.HttpResponse
 import kotlinx.serialization.SerialName
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class CatRepository @Inject constructor(
     private val ktorClient: HttpClient
 ) {
@@ -14,6 +16,6 @@ class CatRepository @Inject constructor(
         limit: Int = 10,
         breedIds: List<String>? = null,
     ): List<Cat> {
-        return ktorClient.get(FindSomeCats(limit, breedIds)).body()
+        return ktorClient.get(FindSomeCats(limit = limit, breedIds = breedIds)).body()
     }
 }

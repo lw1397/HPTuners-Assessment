@@ -2,6 +2,7 @@ package com.example.hptuners.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.hptuners.data.UserPreferences
 import com.example.hptuners.utils.UiState
 import com.example.hptuners.data.adoptedCat.AdoptedCatRepository
 import com.example.hptuners.data.breed.Breed
@@ -15,12 +16,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.collections.filter
 
 val randomCatNames = listOf(
     "Tater Tot",
@@ -54,6 +57,7 @@ val randomCatNames = listOf(
 class AdoptACatViewModel @Inject constructor(
     private val catRepository: CatRepository,
     private val adoptedCatRepository: AdoptedCatRepository,
+    private val userPreferences: UserPreferences,
     breedRepository: BreedRepository
 ): ViewModel() {
 
@@ -61,9 +65,7 @@ class AdoptACatViewModel @Inject constructor(
         if (breeds.isEmpty()) {
             UiState.loading()
         } else {
-            breeds.filter { it.temperament.length > 1 }.let {
-                UiState.success(breeds)
-            }
+            UiState.success(breeds)
         }
     }.stateIn(
         scope = viewModelScope,
@@ -71,12 +73,21 @@ class AdoptACatViewModel @Inject constructor(
         initialValue = UiState.loading()
     )
 
-    private val _breedFilter = MutableStateFlow<String?>(null)
-    val breedFilter = _breedFilter.asStateFlow()
+    val preferredBreed: StateFlow<Breed?> = breedOptions.combine(userPreferences.preferredBreed) { breeds, pref ->
+        if (breeds.data.isNullOrEmpty()) {
+            null
+        } else {
+            breeds.data.firstOrNull { it.id == pref }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = null
+    )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val catOptions: StateFlow<UiState<List<Cat>>> = _breedFilter.flatMapLatest {
-        loadCats(it)
+    val catOptions: StateFlow<UiState<List<Cat>>> = preferredBreed.flatMapLatest {
+        loadCats(it?.id)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -93,8 +104,10 @@ class AdoptACatViewModel @Inject constructor(
         emit(UiState.success(cats))
     }
 
-    fun setBreedFilter(breedId: String?) {
-        _breedFilter.value = breedId
+    fun setPreferredBreed(breedId: String?) {
+        viewModelScope.launch {
+            userPreferences.setPreferredBreed(breedId ?: "")
+        }
     }
 
     fun adoptACat(chosen: Cat, name: String, onSaved: () -> Unit) {

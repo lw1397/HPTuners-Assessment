@@ -1,6 +1,10 @@
 package com.example.hptuners
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.example.hptuners.data.adoptedCat.AdoptedCatDao
 import com.example.hptuners.data.breed.BreedDao
@@ -44,7 +48,7 @@ class AppModule {
                 json(Json {
                     prettyPrint = true
                     isLenient = true
-                    ignoreUnknownKeys = true // Prevents crashes if API adds new fields
+                    ignoreUnknownKeys = true
                 })
             }
             install(DefaultRequest) {
@@ -53,6 +57,11 @@ class AppModule {
             }
         }
 
+    @Provides
+    @Singleton
+    fun provideDataStore(@ApplicationContext context: Context): DataStore<Preferences> = PreferenceDataStoreFactory.create(
+        produceFile = { context.preferencesDataStoreFile("preferences") }
+    )
 
     @Provides
     @Singleton

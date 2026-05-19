@@ -1,8 +1,5 @@
 package com.example.hptuners.data.cat
 
-import androidx.room.Embedded
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import io.ktor.resources.Resource
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -25,7 +22,7 @@ data class BasicBreed(
     val origin: String,
 )
 
-enum class SortOrder { RAND, ASC, DESC }
+enum class CatApiSortOrder { RAND, ASC, DESC }
 
 @Serializable
 @Resource("/v1/images/search")
@@ -33,5 +30,5 @@ class FindSomeCats(
     val limit: Int,
     @SerialName("breed_ids") val breedIds: List<String>? = null,
     @SerialName("has_breeds") val hasBreeds: Int = 1,
-    val order: SortOrder = SortOrder.RAND,
+    val order: CatApiSortOrder = CatApiSortOrder.RAND,
 )
