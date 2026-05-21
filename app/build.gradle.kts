@@ -37,7 +37,7 @@ android {
     buildTypes {
         debug {
             val apiKey: String = project.findProperty("CATS_API_KEY") as String
-            buildConfigField("String", "CATS_API_KEY", apiKey)
+            buildConfigField("String", "CATS_API_KEY", "\"$apiKey\"")
             buildConfigField("String", "BASE_URL", "\"https://api.thecatapi.com\"")
         }
         release {
