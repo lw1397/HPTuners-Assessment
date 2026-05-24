@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "HPTuners"
+rootProject.name = "AdoptACat"
 include(":app")
